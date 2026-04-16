@@ -620,7 +620,7 @@ def get_doc(doc: SolrDocument):
                 {
                     **ed,
                     'title': ed.get('title', 'Untitled'),
-                    'url': f"{ed['key']}/{urlsafe(ed.get('title', 'Untitled'))}",
+                    'url': f"{ed.get('key', '')}/{urlsafe(ed.get('title', 'Untitled'))}",
                 }
             )
             for ed in doc.get('editions', {}).get('docs', [])
@@ -1081,6 +1081,15 @@ async def _process_solr_search_response(response: SearchResponse, fields: str) -
     Handles the post-processing of the Solr response, which is common
     to both sync and async versions.
     """
+    if response.raw_resp is None:
+        # Solr returned an error; surface an empty-but-valid response
+        return {
+            'numFound': 0,
+            'num_found': 0,
+            'start': 0,
+            'numFoundExact': True,
+            'docs': [],
+        }
     processed_response = response.raw_resp['response']
 
     if response.highlighting is not None:

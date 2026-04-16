@@ -215,7 +215,12 @@ async def search_subjects_json(
     )
 
     if response.raw_resp is None:
-        return {"numFound": 0, "start": 0, "docs": []}
+        return {
+            "numFound": 0,
+            "numFoundExact": True,
+            "start": pagination.offset or 0,
+            "docs": [],
+        }
 
     # Backward compatibility
     raw_resp = response.raw_resp["response"]
@@ -304,8 +309,8 @@ async def search_lists_json(
     if params.api == "next":
         # Match search.json
         return {
-            "numFound": response.num_found,
-            "num_found": response.num_found,
+            "numFound": response.num_found or 0,
+            "num_found": response.num_found or 0,
             "start": start,
             "q": params.q,
             "docs": response.docs,
@@ -344,7 +349,12 @@ async def search_authors_json(
     )
 
     if response.raw_resp is None:
-        return {"numFound": 0, "start": 0, "docs": []}
+        return {
+            "numFound": 0,
+            "numFoundExact": True,
+            "start": params.offset or 0,
+            "docs": [],
+        }
 
     # SIGH the public API exposes the key like this :(
     raw_resp = response.raw_resp["response"]

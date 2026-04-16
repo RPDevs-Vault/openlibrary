@@ -620,10 +620,11 @@ def get_doc(doc: SolrDocument):
                 {
                     **ed,
                     'title': ed.get('title', 'Untitled'),
-                    'url': f"{ed.get('key', '')}/{urlsafe(ed.get('title', 'Untitled'))}",
+                    'url': f"{ed['key']}/{urlsafe(ed.get('title', 'Untitled'))}",
                 }
             )
             for ed in doc.get('editions', {}).get('docs', [])
+            if 'key' in ed
         ],
         ratings_average=doc.get('ratings_average', None),
         ratings_count=doc.get('ratings_count', None),

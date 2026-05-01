@@ -313,13 +313,14 @@ def get_borrow_status(itemid):
     editions = web.ctx.site.get_many(edition_keys)
     has_waitinglist = editions and any(e.get_waitinglist_size() > 0 for e in editions)
 
-    return web.storage({
-        "identifier": itemid,
-        "checkedout": has_loan or has_waitinglist,
-        "has_loan": has_loan,
-        "has_waitinglist": has_waitinglist,
-    })
-
+    return web.storage(
+        {
+            "identifier": itemid,
+            "checkedout": has_loan or has_waitinglist,
+            "has_loan": has_loan,
+            "has_waitinglist": has_waitinglist,
+        }
+    )
 
 
 @public
@@ -390,7 +391,6 @@ def get_edition_loans(edition):
         if loan:
             return [loan]
     return []
-
 
 
 def get_loan_key(resource_id: str):

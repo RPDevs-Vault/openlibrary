@@ -228,11 +228,7 @@ class ReadProcessor:
         if iaids:
             ia_query = "type:edition AND ia:(" + " OR ".join(Solr.escape(iaid) for iaid in iaids) + ")"
             solr_result = await get_solr().select_async(ia_query, fields=["ia", "ebook_access"], rows=len(iaids))
-            self.iaid_to_ebook_access = {
-                iaid: doc.get("ebook_access")
-                for doc in solr_result.docs
-                for iaid in (doc.get("ia") or [])
-            }
+            self.iaid_to_ebook_access = {iaid: doc.get("ebook_access") for doc in solr_result.docs for iaid in (doc.get("ia") or [])}
         else:
             self.iaid_to_ebook_access = {}
 

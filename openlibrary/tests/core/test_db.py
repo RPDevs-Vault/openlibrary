@@ -180,9 +180,7 @@ class TestUpdateWorkID:
             )
         )
         assert len(books) == 1, "Should only have one entry after moving"
-        assert books[0]["edition_id"] == int(
-            edition_id
-        ), "Edition ID should be preserved"
+        assert books[0]["edition_id"] == int(edition_id), "Edition ID should be preserved"
         assert books[0]["bookshelf_id"] == 3, "Should now be on Already Read shelf"
 
         # Verify no entry remains on the old shelf

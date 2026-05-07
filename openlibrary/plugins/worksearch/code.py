@@ -1029,7 +1029,7 @@ class edition_search(delegate.page):
     def GET(self):
         i = web.input(q='', page=None, sort=None, work_key=None)
         q = i.q.strip()
-        work_key = i.get('work_key', '').strip() or None
+        work_key = (i.work_key or '').strip() or None
         results_per_page = 20
         page = safeint(i.page, 1) if i.page else 1
         offset = (page - 1) * results_per_page

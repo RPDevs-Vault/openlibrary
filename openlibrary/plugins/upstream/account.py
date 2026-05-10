@@ -534,9 +534,6 @@ class account_login_otp_issue(delegate.page):
         return delegate.RawText(json.dumps({"error": result.get("error", "otp_issue_failed")}))
 
 
-_OTP_REDIRECT_BLACKLIST = ["/account/login", "/account/create"]
-
-
 class account_login_otp_redeem(delegate.page):
     path = "/account/login/otp/redeem"
 
@@ -569,7 +566,9 @@ class account_login_otp_redeem(delegate.page):
         if ol_account := OpenLibraryAccount.get_by_email(email):
             _set_account_cookies(ol_account, expires="")
         redirect = i.redirect
-        if not redirect or any(path in redirect for path in _OTP_REDIRECT_BLACKLIST):
+        # Reject non-path redirects (open redirect prevention) and login loops
+        _blacklist = ["/account/login", "/account/create"]
+        if not redirect or not redirect.startswith("/") or redirect.startswith("//") or any(path in redirect for path in _blacklist):
             redirect = "/account/books"
         return delegate.RawText(json.dumps({"success": True, "redirect": redirect}))
 

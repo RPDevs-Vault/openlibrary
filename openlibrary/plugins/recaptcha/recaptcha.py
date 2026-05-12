@@ -5,6 +5,8 @@ import logging
 import requests
 import web
 
+from openlibrary.plugins.upstream.utils import get_proxy_params
+
 logger = logging.getLogger("openlibrary")
 
 INVALIDATING_ERRORS = [
@@ -42,7 +44,7 @@ class Recaptcha(web.form.Input):
         }
 
         try:
-            r = requests.get(url, params=params, timeout=3)
+            r = requests.get(url, params=params, timeout=3, proxies=get_proxy_params("recaptcha"))
         except requests.exceptions.RequestException:
             logger.exception("Recaptcha call failed: letting user through")
             return True

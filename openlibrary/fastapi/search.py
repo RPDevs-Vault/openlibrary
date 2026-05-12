@@ -300,11 +300,7 @@ async def search_lists_json(
         request_label="LIST_SEARCH_API",
     )
 
-    start = (
-        response.raw_resp["response"].get("start", params.offset or 0)
-        if response.raw_resp
-        else (params.offset or 0)
-    )
+    start = response.raw_resp["response"].get("start", params.offset or 0) if response.raw_resp else (params.offset or 0)
 
     if params.api == "next":
         # Match search.json

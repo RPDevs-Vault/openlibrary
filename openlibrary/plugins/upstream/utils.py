@@ -1626,32 +1626,31 @@ def setup_requests(config=config) -> None:
 def get_proxy_params(service_tag: str) -> dict[str, str] | None:
     """Return a requests-compatible proxies dict for a service requiring proxy auth.
 
-    Reads from the ``http_proxies`` config section. Each entry may have:
-      url: proxy base URL
-      user: proxy username
-      password: proxy password
+    Reads ``http_proxy`` for the shared proxy URL and ``http_proxy_services``
+    for per-service credentials formatted as ``'user:password'``.
 
-    Returns None when no service-specific config exists so that callers can
-    pass the result directly as ``proxies=`` to requests — None means requests
-    will fall back to the global HTTP_PROXY/HTTPS_PROXY env vars set by
-    setup_requests().
+    Returns None when either the base proxy URL or the service entry is absent,
+    allowing callers to pass the result directly as ``proxies=`` to requests so
+    that requests falls back to the global HTTP_PROXY/HTTPS_PROXY env vars.
     """
-    service = config.get("http_proxies", {}).get(service_tag)
-    if not service:
+    proxy_url = config.get("http_proxy", "")
+    if not proxy_url:
         return None
 
-    proxy_url = service.get("url", "")
-    user = service.get("user", "")
-    password = service.get("password", "")
+    creds = config.get("http_proxy_services", {}).get(service_tag)
+    if creds is None:
+        return None
 
-    if user and proxy_url:
-        parsed = urlparse(proxy_url)
-        netloc = f"{quote(user, safe='')}:{quote(password, safe='')}@{parsed.hostname}"
-        if parsed.port:
-            netloc += f":{parsed.port}"
-        proxy_url = urlunparse(parsed._replace(netloc=netloc))
+    if creds:
+        user, _, password = creds.partition(":")
+        if user:
+            parsed = urlparse(proxy_url)
+            netloc = f"{quote(user, safe='')}:{quote(password, safe='')}@{parsed.hostname}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+            proxy_url = urlunparse(parsed._replace(netloc=netloc))
 
-    return {"http": proxy_url, "https": proxy_url} if proxy_url else None
+    return {"http": proxy_url, "https": proxy_url}
 
 
 def setup() -> None:

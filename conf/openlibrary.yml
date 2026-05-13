@@ -190,16 +190,10 @@ sentry_cron_jobs:
 observation_cache_duration: 86400
 
 # Proxy configuration.
-# http_proxy sets the global default (no auth) via HTTP_PROXY/HTTPS_PROXY env vars.
-# http_proxies overrides per service with credentials; each entry has url/user/password.
+# http_proxy sets the shared proxy URL (also used as global default via HTTP_PROXY/HTTPS_PROXY env vars).
+# http_proxy_services maps service names to 'user:password' credentials for authenticated proxy access.
 # Dev/local: leave both unset — no proxy needed.
-# http_proxy: http://squid.example.com:3128
-# http_proxies:
-#   recaptcha:
-#     url: http://squid.example.com:3128
-#     user: ''
-#     password: ''
-#   amazon:
-#     url: http://squid.example.com:3128
-#     user: ''
-#     password: ''
+# http_proxy: 'http://http-proxy.us.archive.org:8080'
+# http_proxy_services:
+#   recaptcha: 'user:password'
+#   amazon: 'user:password'

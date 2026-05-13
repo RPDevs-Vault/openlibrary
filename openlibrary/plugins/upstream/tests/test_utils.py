@@ -386,31 +386,48 @@ def test_get_language_name(add_languages):  # noqa: F811
 
 
 class TestGetProxyParams:
-    def test_no_http_proxies_config(self):
+    def _cfg(self, data: dict):
+        return lambda key, default=None: data.get(key, default)
+
+    def test_no_http_proxy_config(self):
         with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
-            mock_config.get.return_value = {}
+            mock_config.get.side_effect = self._cfg({})
+            assert utils.get_proxy_params("recaptcha") is None
+
+    def test_no_http_proxy_services_config(self):
+        with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
+            mock_config.get.side_effect = self._cfg({"http_proxy": "http://proxy:3128"})
             assert utils.get_proxy_params("recaptcha") is None
 
     def test_unknown_service_tag(self):
         with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
-            mock_config.get.return_value = {"amazon": {"url": "http://proxy:3128"}}
+            mock_config.get.side_effect = self._cfg(
+                {
+                    "http_proxy": "http://proxy:3128",
+                    "http_proxy_services": {"amazon": "user:pass"},
+                }
+            )
             assert utils.get_proxy_params("recaptcha") is None
 
-    def test_url_only_no_auth(self):
+    def test_empty_creds(self):
         with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
-            mock_config.get.return_value = {"recaptcha": {"url": "http://proxy:3128"}}
+            mock_config.get.side_effect = self._cfg(
+                {
+                    "http_proxy": "http://proxy:3128",
+                    "http_proxy_services": {"recaptcha": ""},
+                }
+            )
             result = utils.get_proxy_params("recaptcha")
         assert result == {"http": "http://proxy:3128", "https": "http://proxy:3128"}
 
     def test_url_with_auth(self):
         with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
-            mock_config.get.return_value = {
-                "recaptcha": {
-                    "url": "http://proxy:3128",
-                    "user": "myuser",
-                    "password": "mypass",
+            mock_config.get.side_effect = self._cfg(
+                {
+                    "http_proxy": "http://proxy:3128",
+                    "http_proxy_services": {"recaptcha": "myuser:mypass"},
                 }
-            }
+            )
             result = utils.get_proxy_params("recaptcha")
         assert result == {
             "http": "http://myuser:mypass@proxy:3128",
@@ -419,13 +436,12 @@ class TestGetProxyParams:
 
     def test_special_chars_in_credentials_are_encoded(self):
         with patch("openlibrary.plugins.upstream.utils.config") as mock_config:
-            mock_config.get.return_value = {
-                "recaptcha": {
-                    "url": "http://proxy:3128",
-                    "user": "u@ser",
-                    "password": "p@ss:word",
+            mock_config.get.side_effect = self._cfg(
+                {
+                    "http_proxy": "http://proxy:3128",
+                    "http_proxy_services": {"recaptcha": "u@ser:p@ss:word"},
                 }
-            }
+            )
             result = utils.get_proxy_params("recaptcha")
         assert result == {
             "http": "http://u%40ser:p%40ss%3Aword@proxy:3128",

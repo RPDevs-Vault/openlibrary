@@ -1633,13 +1633,14 @@ def get_proxy_params(service_tag: str) -> dict[str, str] | None:
     allowing callers to pass the result directly as ``proxies=`` to requests so
     that requests falls back to the global HTTP_PROXY/HTTPS_PROXY env vars.
     """
-    proxy_url = config.get("http_proxy", "")
-    if not proxy_url:
+    proxy_url = config.get("http_proxy") or ""
+    if not proxy_url.startswith(("http://", "https://")):
         return None
 
-    creds = config.get("http_proxy_services", {}).get(service_tag)
-    if creds is None:
+    creds = config.get("http_proxy_services") or {}
+    if service_tag not in creds:
         return None
+    creds = creds[service_tag] or ""
 
     if creds:
         user, _, password = creds.partition(":")

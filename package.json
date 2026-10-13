@@ -57,7 +57,7 @@
     "bundlesize2": "^0.0.35",
     "chart.js": "2.9.4",
     "chartjs-plugin-datalabels": "0.7.0",
-    "concurrently": "^10.0.0",
+    "concurrently": "^10.0.6",
     "datatables.net-dt": "1.13.11",
     "diff": "^4.0.4",
     "eslint": "^9.39.4",
